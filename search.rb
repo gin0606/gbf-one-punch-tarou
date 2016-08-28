@@ -1,81 +1,13 @@
 require 'twitter'
 require 'dotenv'
-require 'rbconfig'
+require './clipboard.rb'
+require './relief_request.rb'
 
 Dotenv.load
-NAMES = ENV['ONE_PUN_NAMES'].encode("UTF-8").split(',')
+
+ONE_PUN_NAMES = ENV['ONE_PUN_NAMES'].encode("UTF-8").split(',')
 INCLUDE_120_HELL = ENV['INCLUDE_120_HELL'] == 'true' ? true : false
 INCLUDE_100_HELL = ENV['INCLUDE_100_HELL'] == 'true' ? true : false
-
-MAGUNA = [
-  'ティアマト・マグナ',
-  'コロッサス・マグナ',
-  'リヴァイアサン・マグナ',
-  'ユグドラシル・マグナ',
-  'シュヴァリエ・マグナ',
-  'セレスト・マグナ',
-].freeze
-
-class ReliefRequest
-  attr_reader :id, :name, :level
-
-  def initialize(str)
-    match = str.match(/.*参加者募集！参戦ID：(\w{1,})\nLv(\d{1,3}) (.*)\nhttp.*/)
-    if match
-      @id = match[1]
-      @level = match[2].to_i
-      @name = match[3]
-    end
-  end
-
-  def maguna?
-    MAGUNA.include?(name)
-  end
-
-  def hl_maguna?
-    level >= 100 && maguna?
-  end
-end
-
-class Clipboard
-  class << self
-    def copy(text)
-      clipboard.copy(text)
-    end
-
-    def clipboard
-      @@clipboard ||= Clipboard.new
-    end
-  end
-
-  def os
-    @os ||= (
-    host_os = RbConfig::CONFIG['host_os']
-    case host_os
-    when /mswin|msys|mingw|cygwin|bccwin|wince|emc/
-      :windows
-    when /darwin|mac os/
-      :macosx
-    when /linux/
-      :linux
-    when /solaris|bsd/
-      :unix
-    else
-      :unknown
-    end
-    )
-  end
-
-  def copy(text)
-    if os == :macosx
-      `echo '#{text}' | pbcopy`
-    elsif os == :windows
-      `echo '#{text}' | clip`
-    else
-      raise "#{os} is not supported."
-    end
-  end
-end
 
 client = Twitter::Streaming::Client.new do |config|
   config.consumer_key        = ENV['TWITTER_CONSUMER_KEY']
@@ -89,7 +21,7 @@ options = {
 }
 
 def hairu?(r)
-  return false unless NAMES.include?(r.name)
+  return false unless ONE_PUN_NAMES.include?(r.name)
   # マグナ系の場合はHLかどうか判定
   return true unless r.maguna?
   return true unless r.hl_maguna?
