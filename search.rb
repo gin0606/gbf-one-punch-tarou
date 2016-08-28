@@ -6,8 +6,8 @@ require './relief_request.rb'
 Dotenv.load
 
 ONE_PUN_NAMES = ENV['ONE_PUN_NAMES'].encode("UTF-8").split(',')
-INCLUDE_120_HELL = ENV['INCLUDE_120_HELL'] == 'true' ? true : false
-INCLUDE_100_HELL = ENV['INCLUDE_100_HELL'] == 'true' ? true : false
+INCLUDE_120_HELL = ENV['INCLUDE_120_HELL'] == 'true'
+INCLUDE_100_HELL = ENV['INCLUDE_100_HELL'] == 'true'
 
 client = Twitter::Streaming::Client.new do |config|
   config.consumer_key        = ENV['TWITTER_CONSUMER_KEY']
