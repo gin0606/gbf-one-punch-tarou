@@ -29,8 +29,19 @@ class ReliefRequest
   end
 end
 
-def os
-  @os ||= (
+class Clipboard
+  class << self
+    def copy(text)
+      clipboard.copy(text)
+    end
+
+    def clipboard
+      @@clipboard ||= Clipboard.new
+    end
+  end
+
+  def os
+    @os ||= (
     host_os = RbConfig::CONFIG['host_os']
     case host_os
     when /mswin|msys|mingw|cygwin|bccwin|wince|emc/
@@ -44,17 +55,18 @@ def os
     else
       :unknown
     end
-  )
-end
+    )
+  end
 
-def copy_to_clipboard(r)
+  def copy(text)
     if os == :macosx
-        `echo '#{r.id}' | pbcopy`
+      `echo '#{text}' | pbcopy`
     elsif os == :windows
-        `echo '#{r.id}' | clip`
+      `echo '#{text}' | clip`
     else
-        puts "#{os} is not supported."
+      puts "#{os} is not supported."
     end
+  end
 end
 
 client = Twitter::Streaming::Client.new do |config|
@@ -82,7 +94,7 @@ client.filter(options) do |object|
   r = ReliefRequest.new(object.text)
   if hairu?(r)
     puts "Lv#{r.level} #{r.name} #{r.id}"
-    copy_to_clipboard(r)
+    Clipboard.copy(r.id)
   else
     puts "reject --- Lv#{r.level} #{r.name} #{r.id}"
   end
