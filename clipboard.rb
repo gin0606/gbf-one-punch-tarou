@@ -13,8 +13,7 @@ class Clipboard
 
   def os
     @os ||= (
-    host_os = RbConfig::CONFIG['host_os']
-    case host_os
+    case RbConfig::CONFIG['host_os']
     when /mswin|msys|mingw|cygwin|bccwin|wince|emc/
       :windows
     when /darwin|mac os/
