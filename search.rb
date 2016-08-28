@@ -42,10 +42,10 @@ options = {
 client.filter(options) do |object|
   return unless object.is_a?(Twitter::Tweet)
   r = ReliefRequest.new(object.text)
-  puts "Lv#{r.level} #{r.name} #{r.id}"
-  if NAMES.include?(r.name)
-    if !INCLUDE_100_HELL && MAGUNA.include?(r.name)
-      `echo '#{r.id}' | pbcopy`
-    end
+  if NAMES.include?(r.name) && !INCLUDE_100_HELL && MAGUNA.include?(r.name)
+    puts "Lv#{r.level} #{r.name} #{r.id}"
+    `echo '#{r.id}' | pbcopy`
+  else
+    puts "reject --- Lv#{r.level} #{r.name} #{r.id}"
   end
 end
