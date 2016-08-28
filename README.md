@@ -16,4 +16,5 @@ https://apps.twitter.com/ で App を作る
 
 # ワンパンしたいやつの設定
 - ONE_PUN_NAMES: カンマ区切りで設定する（例：`セレスト・マグナ,シュヴァリエ・マグナ`
+- INCLUDE_100_HELL: 100HL を含むか否か（ `true` or `false`
 - INCLUDE_120_HELL: 120HL を含むか否か（ `true` or `false`

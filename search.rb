@@ -2,9 +2,19 @@ require 'twitter'
 require 'dotenv'
 
 Dotenv.load
-
 NAMES = ENV['ONE_PUN_NAMES'].split(',')
-HELL = ENV['INCLUDE_120_HELL'] == 'true' ? true : false
+INCLUDE_120_HELL = ENV['INCLUDE_120_HELL'] == 'true' ? true : false
+INCLUDE_100_HELL = ENV['INCLUDE_100_HELL'] == 'true' ? true : false
+
+MAGUNA = [
+  'ティアマト・マグナ',
+  'コロッサス・マグナ',
+  'リヴァイアサン・マグナ',
+  'ユグドラシル・マグナ',
+  'シュヴァリエ・マグナ',
+  'セレスト・マグナ',
+].freeze
+
 
 class ReliefRequest
   attr_reader :id, :name, :level
@@ -27,13 +37,15 @@ client = Twitter::Streaming::Client.new do |config|
 end
 
 options = {
-  track: "ID Lv50,Lv60,,Lv70,Lv75,Lv100#{ HELL ? ',Lv120' : '' }"
+  track: "ID Lv50,Lv60,,Lv70,Lv75,Lv100#{ INCLUDE_120_HELL ? ',Lv120' : '' }"
 }
 client.filter(options) do |object|
   return unless object.is_a?(Twitter::Tweet)
   r = ReliefRequest.new(object.text)
+  puts "Lv#{r.level} #{r.name} #{r.id}"
   if NAMES.include?(r.name)
-    puts "Lv#{r.level} #{r.name} #{r.id}"
-    `echo '#{r.id}' | pbcopy`
+    if !INCLUDE_100_HELL && MAGUNA.include?(r.name)
+      `echo '#{r.id}' | pbcopy`
+    end
   end
 end
