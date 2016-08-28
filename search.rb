@@ -48,7 +48,6 @@ def os
 end
 
 def copy_to_clipboard(r)
-    puts "Lv#{r.level} #{r.name} #{r.id}"
     if os == :macosx
         `echo '#{r.id}' | pbcopy`
     elsif os == :windows
@@ -69,24 +68,21 @@ options = {
   track: "ID Lv50,Lv60,,Lv70,Lv75,Lv100#{ INCLUDE_120_HELL ? ',Lv120' : '' }"
 }
 
+def hairu?(r)
+  return false unless NAMES.include?(r.name)
+  return true unless MAGUNA.include?(r.name)
+  return true unless r.level == "100"
+  # マグナ系の場合はHLかどうか判定
+  return true if INCLUDE_100_HELL
+  return false
+end
+
 client.filter(options) do |object|
   return unless object.is_a?(Twitter::Tweet)
   r = ReliefRequest.new(object.text)
-  if NAMES.include?(r.name)
-    if MAGUNA.include?(r.name)
-        # マグナ系の場合はHLかどうか判定
-        if r.level == "100"
-            if INCLUDE_100_HELL
-                copy_to_clipboard(r)
-            else
-                puts "reject --- Lv#{r.level} #{r.name} #{r.id}"
-            end
-        else
-            copy_to_clipboard(r)
-        end
-    else
-        copy_to_clipboard(r)
-    end
+  if hairu?(r)
+    puts "Lv#{r.level} #{r.name} #{r.id}"
+    copy_to_clipboard(r)
   else
     puts "reject --- Lv#{r.level} #{r.name} #{r.id}"
   end
