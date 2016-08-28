@@ -27,6 +27,14 @@ class ReliefRequest
       @name = match[3]
     end
   end
+
+  def maguna?
+    MAGUNA.include?(name)
+  end
+
+  def hl_maguna?
+    level >= 100 && maguna?
+  end
 end
 
 class Clipboard
@@ -82,11 +90,10 @@ options = {
 
 def hairu?(r)
   return false unless NAMES.include?(r.name)
-  return true unless MAGUNA.include?(r.name)
-  return true unless r.level == 100
   # マグナ系の場合はHLかどうか判定
-  return true if INCLUDE_100_HELL
-  return false
+  return true unless r.maguna?
+  return true unless r.hl_maguna?
+  return INCLUDE_100_HELL
 end
 
 client.filter(options) do |object|
