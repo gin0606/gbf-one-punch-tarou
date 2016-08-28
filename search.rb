@@ -1,8 +1,9 @@
 require 'twitter'
 require 'dotenv'
+require 'rbconfig'
 
 Dotenv.load
-NAMES = ENV['ONE_PUN_NAMES'].split(',')
+NAMES = ENV['ONE_PUN_NAMES'].encode("UTF-8").split(',')
 INCLUDE_120_HELL = ENV['INCLUDE_120_HELL'] == 'true' ? true : false
 INCLUDE_100_HELL = ENV['INCLUDE_100_HELL'] == 'true' ? true : false
 
@@ -14,7 +15,6 @@ MAGUNA = [
   'シュヴァリエ・マグナ',
   'セレスト・マグナ',
 ].freeze
-
 
 class ReliefRequest
   attr_reader :id, :name, :level
@@ -29,6 +29,35 @@ class ReliefRequest
   end
 end
 
+def os
+  @os ||= (
+    host_os = RbConfig::CONFIG['host_os']
+    case host_os
+    when /mswin|msys|mingw|cygwin|bccwin|wince|emc/
+      :windows
+    when /darwin|mac os/
+      :macosx
+    when /linux/
+      :linux
+    when /solaris|bsd/
+      :unix
+    else
+      :unknown
+    end
+  )
+end
+
+def copy_to_clipboard(r)
+    puts "Lv#{r.level} #{r.name} #{r.id}"
+    if os == :macosx
+        `echo '#{r.id}' | pbcopy`
+    elsif os == :windows
+        `echo '#{r.id}' | clip`
+    else
+        puts "#{os} is not supported."
+    end
+end
+
 client = Twitter::Streaming::Client.new do |config|
   config.consumer_key        = ENV['TWITTER_CONSUMER_KEY']
   config.consumer_secret     = ENV['TWITTER_CONSUMER_SECRET']
@@ -39,12 +68,25 @@ end
 options = {
   track: "ID Lv50,Lv60,,Lv70,Lv75,Lv100#{ INCLUDE_120_HELL ? ',Lv120' : '' }"
 }
+
 client.filter(options) do |object|
   return unless object.is_a?(Twitter::Tweet)
   r = ReliefRequest.new(object.text)
-  if NAMES.include?(r.name) && !INCLUDE_100_HELL && MAGUNA.include?(r.name)
-    puts "Lv#{r.level} #{r.name} #{r.id}"
-    `echo '#{r.id}' | pbcopy`
+  if NAMES.include?(r.name)
+    if MAGUNA.include?(r.name)
+        # マグナ系の場合はHLかどうか判定
+        if r.level == "100"
+            if INCLUDE_100_HELL
+                copy_to_clipboard(r)
+            else
+                puts "reject --- Lv#{r.level} #{r.name} #{r.id}"
+            end
+        else
+            copy_to_clipboard(r)
+        end
+    else
+        copy_to_clipboard(r)
+    end
   else
     puts "reject --- Lv#{r.level} #{r.name} #{r.id}"
   end
