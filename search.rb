@@ -23,7 +23,7 @@ class ReliefRequest
     match = str.match(/.*参加者募集！参戦ID：(\w{1,})\nLv(\d{1,3}) (.*)\nhttp.*/)
     if match
       @id = match[1]
-      @level = match[2]
+      @level = match[2].to_i
       @name = match[3]
     end
   end
@@ -71,7 +71,7 @@ options = {
 def hairu?(r)
   return false unless NAMES.include?(r.name)
   return true unless MAGUNA.include?(r.name)
-  return true unless r.level == "100"
+  return true unless r.level == 100
   # マグナ系の場合はHLかどうか判定
   return true if INCLUDE_100_HELL
   return false
