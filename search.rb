@@ -64,7 +64,7 @@ class Clipboard
     elsif os == :windows
       `echo '#{text}' | clip`
     else
-      puts "#{os} is not supported."
+      raise "#{os} is not supported."
     end
   end
 end
