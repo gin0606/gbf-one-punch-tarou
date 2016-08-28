@@ -1,5 +1,7 @@
 # グラブルワンパン太郎
 
+風ホーク死ね
+
 ```sh
 $ bundle install
 $ bundle exec ruby ./search.rb # 実行してる間救援IDがクリップボードに入り続ける
