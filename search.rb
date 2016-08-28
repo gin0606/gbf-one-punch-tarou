@@ -16,6 +16,19 @@ MAGUNA = [
   'セレスト・マグナ',
 ].freeze
 
+class ReliefRequest
+  attr_reader :id, :name, :level
+
+  def initialize(str)
+    match = str.match(/.*参加者募集！参戦ID：(\w{1,})\nLv(\d{1,3}) (.*)\nhttp.*/)
+    if match
+      @id = match[1]
+      @level = match[2]
+      @name = match[3]
+    end
+  end
+end
+
 def os
   @os ||= (
     host_os = RbConfig::CONFIG['host_os']
@@ -34,17 +47,15 @@ def os
   )
 end
 
-class ReliefRequest
-  attr_reader :id, :name, :level
-
-  def initialize(str)
-    match = str.match(/.*参加者募集！参戦ID：(\w{1,})\nLv(\d{1,3}) (.*)\nhttp.*/)
-    if match
-      @id = match[1]
-      @level = match[2]
-      @name = match[3]
+def copy_to_clipboard(r)
+    puts "Lv#{r.level} #{r.name} #{r.id}"
+    if os == :macosx
+        `echo '#{r.id}' | pbcopy`
+    elsif os == :windows
+        `echo '#{r.id}' | clip`
+    else
+        puts "#{os} is not supported."
     end
-  end
 end
 
 client = Twitter::Streaming::Client.new do |config|
@@ -61,14 +72,20 @@ options = {
 client.filter(options) do |object|
   return unless object.is_a?(Twitter::Tweet)
   r = ReliefRequest.new(object.text)
-  if NAMES.include?(r.name) && !INCLUDE_100_HELL && MAGUNA.include?(r.name)
-    puts "Lv#{r.level} #{r.name} #{r.id}"
-    if os == :macosx
-        `echo '#{r.id}' | pbcopy`
-    elsif os == :windows
-        `echo '#{r.id}' | clip`
+  if NAMES.include?(r.name)
+    if MAGUNA.include?(r.name)
+        # マグナ系の場合はHLかどうか判定
+        if r.level == "100"
+            if INCLUDE_100_HELL
+                copy_to_clipboard(r)
+            else
+                puts "reject --- Lv#{r.level} #{r.name} #{r.id}"
+            end
+        else
+            copy_to_clipboard(r)
+        end
     else
-        puts "#{os} is not supported."
+        copy_to_clipboard(r)
     end
   else
     puts "reject --- Lv#{r.level} #{r.name} #{r.id}"
