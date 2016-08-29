@@ -26,4 +26,8 @@ class ReliefRequest
   def hl_maguna?
     level >= 100 && maguna?
   end
+
+  def to_s
+    "Lv#{level} #{name} #{id}"
+  end
 end

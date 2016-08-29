@@ -32,9 +32,9 @@ client.filter(options) do |object|
   return unless object.is_a?(Twitter::Tweet)
   r = ReliefRequest.new(object.text)
   if hairu?(r)
-    puts "Lv#{r.level} #{r.name} #{r.id}"
+    puts r
     Clipboard.copy(r.id)
   else
-    puts "reject --- Lv#{r.level} #{r.name} #{r.id}"
+    puts "reject --- #{r}"
   end
 end
